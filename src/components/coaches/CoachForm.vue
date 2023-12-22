@@ -1,36 +1,38 @@
 <template>
   <form @submit.prevent='submitForm'>
-    <div class='form-control'>
+    <div class='form-control' :class='{invalid : !firstName.isValid}'>
       <label for='FirstName'>FirstName</label>
-      <input type='text' id='firstname' v-model.trim='firstName' />
+      <input type='text' id='firstname' v-model.trim='firstName.val' @blur="clearValidity('firstName')"/>
     </div>
-    <div class='form-control'>
+    <div class='form-control' :class='{invalid : !lastName.isValid}'>
       <label for='LastName'>LastName</label>
-      <input type='text' id='lastname' v-model.trim='lastName' />
+      <input type='text' id='lastname' v-model.trim='lastName.val'  @blur="clearValidity('lastName')" />
     </div>
-    <div class='form-control'>
+    <div class='form-control' :class='{invalid : !rate.isValid}'>
       <label for='rate'>Rate</label>
-      <input type='number' id='rate' v-model.number='rate' />
+      <input type='number' id='rate' v-model.number='rate.val'  @blur="clearValidity('rate')"/>
     </div>
     <div class='form-control'>
       <h3>Area of expertise</h3>
       <div>
-        <input type='checkbox' id='frontend' value='frontend' v-model.trim='areas'>
+        <input type='checkbox' id='frontend' value='frontend' v-model.trim='areas.val' @blur="clearValidity('areas')">
         <label for='frontend'>FrontEnd Development</label>
       </div>
       <div>
-        <input type='checkbox' id='backend' value='backend' v-model.trim='areas'>
+        <input type='checkbox' id='backend' value='backend' v-model.trim='areas.val' @blur="clearValidity('areas')">
         <label for='backend'>Backend Development</label>
       </div>
       <div>
-        <input type='checkbox' id='career' value='career' v-model.trim='areas'>
+        <input type='checkbox' id='career' value='career' v-model.trim='areas.val' @blur="clearValidity('areas')">
         <label for='career'>Career Consultation</label>
       </div>
+      <p v-if='!areas.isValid'>Select atleast one expertise</p>
     </div>
-    <div class='form-control'>
+    <div class='form-control' :class='{invalid : !description.isValid}'>
       <label for='Description'>Description</label>
-      <textarea name='description' id='description' cols='30' rows='5' v-model.trim='description'></textarea>
+      <textarea name='description' id='description' cols='30' rows='5' v-model.trim='description.val' @blur="clearValidity('description')"></textarea>
     </div>
+    <p v-if='!formIsValid' class='invalid'>Please fix the above areas and submit again</p>
     <base-button> Register</base-button>
   </form>
 </template>
@@ -39,19 +41,66 @@
 import BaseButton from '@/components/ui/BaseButton.vue';
 
 export default {
-  emits:['save-data'],
+  emits: ['save-data'],
   components: { BaseButton },
   data() {
     return {
-      firstName: '',
-      lastName: '',
-      rate: null,
-      areas: [],
-      description: ''
+      firstName: {
+        val: '',
+        isValid: true
+      },
+      lastName: {
+        val: '',
+        isValid: true
+      },
+      rate: {
+        val: null,
+        isValid: true
+      },
+      areas: {
+        val: [],
+        isValid: true
+      },
+      description: {
+        val: '',
+        isValid: true
+      },
+      formIsValid: true
     };
   },
   methods: {
+    clearValidity(input){
+      this[input].isValid = true;
+
+    },
+    validateForm() {
+      this.formIsValid = true;
+      if (this.firstName.val === '') {
+        this.firstName.isValid = false;
+        this.formIsValid = false;
+      }
+      if (this.lastName.val === '') {
+        this.lastName.isValid = false;
+        this.formIsValid = false;
+      }
+      if (this.description.val === '') {
+        this.description.isValid = false;
+        this.formIsValid = false;
+      }
+      if (!this.rate.val || this.rate.val < 0) {
+        this.rate.isValid = false;
+        this.formIsValid = false;
+      }
+      if (this.areas.val.length === 0) {
+        this.rate.isValid = false;
+        this.formIsValid = false;
+      }
+    },
     submitForm() {
+      this.validateForm();
+      if (!this.formIsValid) {
+        return;
+      }
       const formData = {
         first: this.firstName,
         last: this.lastName,
@@ -60,8 +109,8 @@ export default {
         areas: this.areas
       };
       // console.log(formData);
-      this.$emit('save-data',formData);
-    }
+      this.$emit('save-data', formData);
+    },
 
   }
 };
