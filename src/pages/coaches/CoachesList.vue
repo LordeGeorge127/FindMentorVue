@@ -6,7 +6,7 @@
     <section>
       <div class='controls'>
         <base-button mode='outline'>Refresh</base-button>
-        <base-button link to='/register'>Register as Coach</base-button>
+        <base-button v-if='!isCoach' link to='/register'>Register as Coach</base-button>
       </div>
 
 
@@ -40,6 +40,11 @@ export default {
     };
   },
   computed: {
+    isCoach()
+    {
+      // console.log(this.$store.getters['coaches/isCoach']);
+      return this.$store.getters['coaches/isCoach'];
+    },
     filteredCoaches() {
       const coaches = this.$store.getters['coaches/coaches'];
       return coaches.filter(coach => {
@@ -59,6 +64,7 @@ export default {
     hasCoaches(state) {
       return state.$store.getters['coaches/hasCoaches'];
     }
+
   },
   methods: {
     setFilters(updateFilters) {
