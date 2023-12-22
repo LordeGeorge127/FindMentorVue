@@ -1,49 +1,81 @@
 <template>
-    <section>FILTER</section>
-    <base-card>
-        <section>
-            <div class="controls">
-                <base-button mode="outline">Refresh</base-button>
-                <base-button link to="/register">Register as Coach</base-button>
-            </div>
+  <section>
+    <coach-filter @change-filter='setFilters'></coach-filter>
+  </section>
+  <base-card>
+    <section>
+      <div class='controls'>
+        <base-button mode='outline'>Refresh</base-button>
+        <base-button link to='/register'>Register as Coach</base-button>
+      </div>
 
 
-            <ul v-if="hasCoaches">
-                <coach-item v-for="coach in filteredCoaches" :key="coach.id" :id="coach.id" :first-name="coach.firstName"
-                    :last-name="coach.lastName" :rate="coach.hourlyRate" :areas="coach.areas"></coach-item>
-            </ul>
-            <h3 v-else>
-                No coaches Available
-            </h3>
+      <ul v-if='hasCoaches'>
+        <coach-item v-for='coach in filteredCoaches' :key='coach.id' :id='coach.id' :first-name='coach.firstName'
+                    :last-name='coach.lastName' :rate='coach.hourlyRate' :areas='coach.areas'></coach-item>
+      </ul>
+      <h3 v-else>
+        No coaches Available
+      </h3>
 
-        </section>
-    </base-card>
+    </section>
+  </base-card>
 </template>
 <script>
-import CoachItem from '../../components/coaches/CoachItem.vue'; 
+import CoachFilter from '@/components/coaches/CoachFilter.vue';
+import CoachItem from '../../components/coaches/CoachItem.vue';
+
 export default {
-    components: {
-        CoachItem
-    },
-    computed: {
-        filteredCoaches() {
-            return this.$store.getters['coaches/coaches']
-        },
-        hasCoaches(state) {
-            return state.$store.getters['coaches/hasCoaches']
+  components: {
+    CoachItem,
+    CoachFilter
+  },
+  data() {
+    return {
+      activeFilter: {
+        frontend: true,
+        backend: true,
+        career: true
+      }
+    };
+  },
+  computed: {
+    filteredCoaches() {
+      const coaches = this.$store.getters['coaches/coaches'];
+      return coaches.filter(coach => {
+          if (coach.areas.includes('frontend') && this.activeFilter.frontend) {
+            return true;
+          }
+          if (coach.areas.includes('backend') && this.activeFilter.backend) {
+            return true;
+          }
+          if (coach.areas.includes('career') && this.activeFilter.career) {
+            return true;
+          }
+          return false;
         }
+      );
+    },
+    hasCoaches(state) {
+      return state.$store.getters['coaches/hasCoaches'];
     }
-}
+  },
+  methods: {
+    setFilters(updateFilters) {
+      this.activeFilter = updateFilters;
+    }
+  }
+};
 </script>
 <style scoped>
 ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .controls {
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }
 </style>
